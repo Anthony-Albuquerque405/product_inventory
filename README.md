@@ -113,6 +113,17 @@ Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` para mais detalhes
 
 ---
 
+---
+
+## 🌐 Visite o Projeto
+
+Você pode acessar a versão online do **Stockly** clicando no link abaixo:
+
+[![Visitar Stockly](https://img.shields.io/badge/Visitar-Stockly-blue?style=for-the-badge&logo=vercel)](https://product-inventory-rho.vercel.app/)
+
+---
+
+
 <div align="center">
 
 Feito com ☕ e muito TypeScript
