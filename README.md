@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# 📦 Stockly
 
-First, run the development server:
+### Sistema de Gerenciamento de Estoque Inteligente
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+*Controle seu inventário com segurança, elegância e praticidade.*
+
+<br/>
+
+[![Next.js](https://img.shields.io/badge/Next.js-16.2.9-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-2.x-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+
+<br/>
+
+[🚀 Ver Demonstração](#-começando) · [🐛 Reportar Bug](../../issues) · [💡 Sugerir Feature](../../issues)
+
+</div>
+
+---
+
+## ✨ Sobre o Projeto
+
+**Stockly** é uma aplicação web fullstack de gerenciamento de inventário construída com **Next.js 16**, **TypeScript** e **Supabase**. Projetada com foco em segurança multi-usuário, interface moderna e experiência fluida, é ideal para pequenas e médias empresas que precisam controlar seu estoque de forma eficiente.
+
+---
+
+## 🎯 Funcionalidades
+
+| Funcionalidade | Descrição |
+|---|---|
+| 🔐 **Autenticação Segura** | Login e cadastro com Supabase Auth + JWT |
+| 🛡️ **Dados Isolados por Usuário** | Row Level Security (RLS) garante que cada usuário vê apenas o seu estoque |
+| 📊 **Dashboard com KPIs** | Cards em tempo real: valor total, unidades, produtos únicos e alertas de baixo estoque |
+| 📝 **Cadastro de Produtos** | Formulário com categorias, preço e quantidade — com feedback animado |
+| ✏️ **Edição Inline** | Edite qualquer produto diretamente na tabela, sem modais |
+| ➖ **Retirada de Quantidade** | Retire unidades do estoque com ajuste de valor e confirmação inteligente |
+| 🗑️ **Exclusão com Confirmação** | Diálogo inline elegante antes de remover um item |
+| 🔍 **Busca e Filtros** | Pesquise por nome e filtre por categoria em tempo real |
+| 🌙 **Tema Dark / Light** | Alternância de tema persistida no `localStorage` |
+| 📱 **Design Responsivo** | Interface glassmorphic adaptada para desktop e mobile |
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **[Next.js 16](https://nextjs.org/)** — Framework React com App Router e API Routes
+- **[TypeScript](https://www.typescriptlang.org/)** — Tipagem estática para maior confiabilidade
+- **[Supabase](https://supabase.com/)** — Backend as a Service (Auth + PostgreSQL + RLS)
+- **[Tailwind CSS 4](https://tailwindcss.com/)** — Estilização utilitária com tema dark/light
+- **[Lucide React](https://lucide.dev/)** — Ícones modernos e consistentes
+- **[React 19](https://reactjs.org/)** — Interface reativa e performática
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+product_inventory/
+├── schema.sql                          # Script SQL para criar tabela e políticas RLS no Supabase
+├── .env.example                        # Modelo de variáveis de ambiente
+└── src/
+    └── app/
+        ├── page.tsx                    # Dashboard principal (protegido por auth)
+        ├── login/page.tsx              # Página de login
+        ├── signup/page.tsx             # Página de cadastro
+        ├── api/
+        │   ├── login/route.ts          # Endpoint de autenticação
+        │   ├── signup/route.ts         # Endpoint de cadastro
+        │   └── products/
+        │       ├── route.ts            # GET (listar) e POST (criar) produtos
+        │       └── [id]/route.ts       # PUT (editar) e DELETE (excluir) produto
+        └── components/
+            ├── header.tsx              # Cabeçalho com nav, tema e logout
+            ├── footer.tsx              # Rodapé com relógio em tempo real
+            ├── product_registration.tsx # Formulário de cadastro de produtos
+            ├── product_table.tsx       # Tabela com KPIs, filtros e ações CRUD
+            └── lib/
+                └── supabaseClient.ts   # Cliente Supabase (padrão e autenticado por JWT)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔒 Segurança
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Todas as rotas de API validam o **token JWT** no cabeçalho `Authorization: Bearer <token>`
+- O banco de dados usa **Row Level Security (RLS)** para garantir isolamento total entre usuários
+- Nenhuma chave sensível é exposta no frontend — as `NEXT_PUBLIC_*` são apenas as chaves públicas do Supabase
+- O arquivo `.env` está protegido pelo `.gitignore`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 📜 Licença
 
-To learn more about Next.js, take a look at the following resources:
+Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` para mais detalhes.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<div align="center">
 
-## Deploy on Vercel
+Feito com ☕ e muito TypeScript
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</div>
