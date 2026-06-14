@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/components/lib/supabaseClient";
-import { Mail, Lock, UserPlus, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  UserPlus,
+  AlertCircle,
+  CheckCircle2,
+  ArrowRight,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function SignupPage() {
@@ -16,7 +23,9 @@ export default function SignupPage() {
   // Se o usuário já estiver logado, redireciona para o dashboard
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
         router.push("/");
       }
@@ -53,10 +62,10 @@ export default function SignupPage() {
 
       if (res.ok) {
         setSuccessMsg(
-          "Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta."
+          "Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta.",
         );
         setCredentials({ email: "", password: "" });
-        
+
         // Se a conta for auto-confirmada e tiver sessão ativa, salva e redireciona
         if (data.session) {
           await supabase.auth.setSession({
@@ -78,19 +87,17 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 p-4 transition-colors duration-500">
-      
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-slate-100 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 p-4 transition-colors duration-500">
       {/* Círculos de luz decorativos de fundo */}
       <div className="absolute top-1/4 right-1/4 -z-10 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl dark:bg-emerald-600/10"></div>
       <div className="absolute bottom-1/4 left-1/4 -z-10 h-80 w-80 rounded-full bg-purple-400/20 blur-3xl dark:bg-purple-600/10"></div>
 
       <div className="w-full max-w-md bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-slate-800/80 shadow-2xl rounded-2xl p-8 transition-all duration-300 transform hover:scale-[1.01]">
-        
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-2xl shadow-lg shadow-emerald-500/25 mb-4 text-white">
+          <div className="inline-flex items-center justify-center p-3 bg-linear-to-tr from-emerald-500 to-teal-600 rounded-2xl shadow-lg shadow-emerald-500/25 mb-4 text-white">
             <UserPlus size={28} />
           </div>
-          <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-indigo-950 dark:from-white dark:to-indigo-200">
+          <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-slate-900 to-indigo-950 dark:from-white dark:to-indigo-200">
             Crie sua conta
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -108,7 +115,10 @@ export default function SignupPage() {
 
         {successMsg && (
           <div className="flex items-start gap-3 p-4 mb-6 text-sm text-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-900/50 rounded-xl animate-fade-in">
-            <CheckCircle2 className="shrink-0 text-emerald-500 mt-0.5" size={18} />
+            <CheckCircle2
+              className="shrink-0 text-emerald-500 mt-0.5"
+              size={18}
+            />
             <span>{successMsg}</span>
           </div>
         )}
@@ -119,7 +129,10 @@ export default function SignupPage() {
               E-mail
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+              <Mail
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                size={18}
+              />
               <input
                 type="email"
                 name="email"
@@ -137,7 +150,10 @@ export default function SignupPage() {
               Senha
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+              <Lock
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                size={18}
+              />
               <input
                 type="password"
                 name="password"
@@ -153,18 +169,26 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full relative overflow-hidden group bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none mt-2 cursor-pointer"
+            className="w-full relative overflow-hidden group bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none mt-2 cursor-pointer"
           >
             <div className="flex items-center justify-center gap-2">
               <span>{loading ? "Cadastrando..." : "Criar Conta"}</span>
-              {!loading && <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />}
+              {!loading && (
+                <ArrowRight
+                  className="group-hover:translate-x-1 transition-transform"
+                  size={18}
+                />
+              )}
             </div>
           </button>
         </form>
 
         <p className="text-sm text-center mt-6 text-slate-500 dark:text-slate-400">
           Já tem uma conta?{" "}
-          <Link href="/login" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline hover:text-blue-700">
+          <Link
+            href="/login"
+            className="text-blue-600 dark:text-blue-400 font-semibold hover:underline hover:text-blue-700"
+          >
             Faça Login
           </Link>
         </p>

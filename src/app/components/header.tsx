@@ -15,8 +15,10 @@ export default function Header({ view, setView }: HeaderProps) {
   // Verifica e sincroniza o tema no carregamento inicial
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+
     if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
       setIsDark(true);
       document.documentElement.classList.add("dark");
@@ -51,13 +53,12 @@ export default function Header({ view, setView }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm transition-colors duration-500">
       <div className="container mx-auto max-w-6xl p-4 flex justify-between items-center">
-        
         {/* Logo */}
         <div className="flex items-center gap-2 select-none">
-          <div className="p-2 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-xl text-white shadow-md shadow-blue-500/20">
+          <div className="p-2 bg-linear-to-tr from-blue-500 to-indigo-600 rounded-xl text-white shadow-md shadow-blue-500/20">
             <Package size={20} />
           </div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-indigo-200 bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold bg-linear-to-r from-slate-900 to-slate-700 dark:from-white dark:to-indigo-200 bg-clip-text text-transparent">
             Stockly
           </h1>
         </div>
@@ -112,7 +113,6 @@ export default function Header({ view, setView }: HeaderProps) {
             </button>
           </div>
         </div>
-        
       </div>
     </header>
   );
