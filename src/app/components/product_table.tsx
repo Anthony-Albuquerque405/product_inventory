@@ -2,23 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabaseClient";
-import { 
-  Loader2, 
-  Search, 
-  Filter, 
-  Edit3, 
-  Trash2, 
-  Check, 
-  X, 
-  DollarSign, 
-  Package, 
+import {
+  Loader2,
+  Search,
+  Filter,
+  Edit3,
+  Trash2,
+  Check,
+  X,
+  DollarSign,
+  Package,
   AlertTriangle,
   TrendingUp,
   Inbox,
   AlertCircle,
   MinusCircle,
   Plus,
-  Minus
+  Minus,
 } from "lucide-react";
 
 interface Product {
@@ -54,7 +54,14 @@ export default function ProductTable() {
   const [zeroStockConfirm, setZeroStockConfirm] = useState(false);
 
   // Categorias únicas do inventário para preencher os filtros
-  const categories = ["Eletrônicos", "Móveis", "Acessórios", "Vestuário", "Alimentos", "Outros"];
+  const categories = [
+    "Eletrônicos",
+    "Móveis",
+    "Acessórios",
+    "Vestuário",
+    "Alimentos",
+    "Outros",
+  ];
 
   const showNotification = (text: string, type: "success" | "error") => {
     setNotification({ text, type });
@@ -66,7 +73,9 @@ export default function ProductTable() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const token = session?.access_token;
 
       if (!token) {
@@ -76,10 +85,10 @@ export default function ProductTable() {
 
       const res = await fetch("/api/products", {
         headers: {
-          "Authorization": `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       const data = await res.json();
 
       if (res.ok) {
@@ -115,12 +124,17 @@ export default function ProductTable() {
     if (!editForm) return;
 
     if (editForm.quantity < 0 || editForm.price < 0) {
-      showNotification("Valores de quantidade e preço não podem ser negativos.", "error");
+      showNotification(
+        "Valores de quantidade e preço não podem ser negativos.",
+        "error",
+      );
       return;
     }
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const token = session?.access_token;
 
       if (!token) {
@@ -132,7 +146,7 @@ export default function ProductTable() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editForm),
       });
@@ -141,7 +155,9 @@ export default function ProductTable() {
 
       if (res.ok) {
         showNotification("Produto atualizado com sucesso!", "success");
-        setProducts(products.map(p => p.id === editForm.id ? data.data : p));
+        setProducts(
+          products.map((p) => (p.id === editForm.id ? data.data : p)),
+        );
         cancelEdit();
       } else {
         showNotification(data.error || "Erro ao atualizar produto", "error");
@@ -174,20 +190,35 @@ export default function ProductTable() {
     }
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const token = session?.access_token;
-      if (!token) { showNotification("Sessão expirada.", "error"); return; }
+      if (!token) {
+        showNotification("Sessão expirada.", "error");
+        return;
+      }
 
       const res = await fetch(`/api/products/${product.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ ...product, quantity: newQty }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        showNotification(`${removeAmount} unidade(s) retirada(s) do estoque!`, "success");
-        setProducts(products.map(p => p.id === product.id ? { ...p, quantity: newQty } : p));
+        showNotification(
+          `${removeAmount} unidade(s) retirada(s) do estoque!`,
+          "success",
+        );
+        setProducts(
+          products.map((p) =>
+            p.id === product.id ? { ...p, quantity: newQty } : p,
+          ),
+        );
         cancelRemove();
       } else {
         showNotification(data.error || "Erro ao atualizar quantidade", "error");
@@ -200,7 +231,9 @@ export default function ProductTable() {
   // Handler para deletar produto
   const deleteProduct = async (id: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       const token = session?.access_token;
 
       if (!token) {
@@ -211,15 +244,15 @@ export default function ProductTable() {
       const res = await fetch(`/api/products/${id}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
 
       if (res.ok) {
         showNotification("Produto excluído com sucesso!", "success");
-        setProducts(products.filter(p => p.id !== id));
+        setProducts(products.filter((p) => p.id !== id));
         setDeletingId(null);
       } else {
         showNotification(data.error || "Erro ao deletar produto", "error");
@@ -231,20 +264,27 @@ export default function ProductTable() {
 
   // Métricas
   const totalProducts = products.length;
-  const totalQuantity = products.reduce((sum, p) => sum + Number(p.quantity), 0);
-  const totalValue = products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.price)), 0);
-  const lowStockCount = products.filter(p => Number(p.quantity) < 5).length;
+  const totalQuantity = products.reduce(
+    (sum, p) => sum + Number(p.quantity),
+    0,
+  );
+  const totalValue = products.reduce(
+    (sum, p) => sum + Number(p.quantity) * Number(p.price),
+    0,
+  );
+  const lowStockCount = products.filter((p) => Number(p.quantity) < 5).length;
 
   // Filtragem
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === "" || p.category === categoryFilter;
+    const matchesCategory =
+      categoryFilter === "" || p.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] w-full">
+      <div className="flex flex-col items-center justify-center min-h-100 w-full">
         <Loader2 className="animate-spin text-blue-600 dark:text-blue-400 h-8 w-8 mb-2" />
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Carregando dados do inventário...
@@ -255,12 +295,11 @@ export default function ProductTable() {
 
   return (
     <div className="space-y-6">
-      
       {/* Notificação flutuante ou topo */}
       {notification && (
-        <div 
+        <div
           className={`flex items-center gap-3 p-4 mb-2 text-sm rounded-xl border animate-fade-in ${
-            notification.type === "success" 
+            notification.type === "success"
               ? "text-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-300 border-emerald-200/50 dark:border-emerald-900/40"
               : "text-red-800 bg-red-50 dark:bg-red-950/20 dark:text-red-300 border-red-200/50 dark:border-red-900/40"
           }`}
@@ -276,7 +315,6 @@ export default function ProductTable() {
 
       {/* Painel de Métricas (Dashboard) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
         {/* Card 1: Valor Total */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/80 rounded-2xl p-5 shadow-sm flex items-center justify-between transition-all">
           <div>
@@ -284,7 +322,11 @@ export default function ProductTable() {
               Valor Total Estocado
             </p>
             <h3 className="text-2xl font-bold text-slate-950 dark:text-white mt-1">
-              R$ {totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              R${" "}
+              {totalValue.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </h3>
           </div>
           <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
@@ -332,23 +374,26 @@ export default function ProductTable() {
               {lowStockCount}
             </h3>
           </div>
-          <div className={`p-3 rounded-xl ${
-            lowStockCount > 0 
-              ? "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 animate-pulse-slow" 
-              : "bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
-          }`}>
+          <div
+            className={`p-3 rounded-xl ${
+              lowStockCount > 0
+                ? "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 animate-pulse-slow"
+                : "bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
+            }`}
+          >
             <AlertTriangle size={22} />
           </div>
         </div>
-
       </div>
 
       {/* Controles de Busca e Filtro */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/80 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
-        
         {/* Busca por Nome */}
         <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+            size={18}
+          />
           <input
             type="text"
             placeholder="Buscar produtos por nome..."
@@ -360,7 +405,10 @@ export default function ProductTable() {
 
         {/* Filtro de Categoria */}
         <div className="relative w-full md:w-60">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={16} />
+          <Filter
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+            size={16}
+          />
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
@@ -368,16 +416,21 @@ export default function ProductTable() {
           >
             <option value="">Todas as Categorias</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
             ))}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+            <svg
+              className="fill-current h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
             </svg>
           </div>
         </div>
-
       </div>
 
       {/* Lista de Produtos (Tabela / Grid responsivo) */}
@@ -410,10 +463,10 @@ export default function ProductTable() {
                   const isLowStock = Number(p.quantity) < 5;
 
                   return (
-                    <tr 
-                      key={p.id} 
+                    <tr
+                      key={p.id}
                       className={`hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors ${
-                        isLowStock ? "bg-amber-500/[0.02] dark:bg-amber-400/[0.01]" : ""
+                        isLowStock ? "bg-amber-500/2 dark:bg-amber-400/1" : ""
                       }`}
                     >
                       {/* Nome */}
@@ -422,7 +475,9 @@ export default function ProductTable() {
                           <input
                             type="text"
                             value={editForm.name}
-                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, name: e.target.value })
+                            }
                             className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                           />
                         ) : (
@@ -435,11 +490,18 @@ export default function ProductTable() {
                         {isEditing && editForm ? (
                           <select
                             value={editForm.category}
-                            onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                category: e.target.value,
+                              })
+                            }
                             className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                           >
                             {categories.map((c) => (
-                              <option key={c} value={c}>{c}</option>
+                              <option key={c} value={c}>
+                                {c}
+                              </option>
                             ))}
                           </select>
                         ) : (
@@ -455,7 +517,12 @@ export default function ProductTable() {
                           <input
                             type="number"
                             value={editForm.quantity}
-                            onChange={(e) => setEditForm({ ...editForm, quantity: Number(e.target.value) })}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                quantity: Number(e.target.value),
+                              })
+                            }
                             className="w-20 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                             min="0"
                           />
@@ -465,7 +532,7 @@ export default function ProductTable() {
                               {p.quantity}
                             </span>
                             {isLowStock && (
-                              <span 
+                              <span
                                 className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400 px-1.5 py-0.5 rounded flex items-center gap-0.5"
                                 title="Estoque abaixo do limite mínimo (5 unidades)"
                               >
@@ -483,7 +550,12 @@ export default function ProductTable() {
                           <input
                             type="number"
                             value={editForm.price}
-                            onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                price: Number(e.target.value),
+                              })
+                            }
                             className="w-24 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                             min="0"
                             step="0.01"
@@ -564,7 +636,11 @@ export default function ProductTable() {
                                   Retirar:
                                 </span>
                                 <button
-                                  onClick={() => setRemoveAmount(Math.max(1, removeAmount - 1))}
+                                  onClick={() =>
+                                    setRemoveAmount(
+                                      Math.max(1, removeAmount - 1),
+                                    )
+                                  }
                                   className="p-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition"
                                   title="Diminuir"
                                 >
@@ -575,11 +651,19 @@ export default function ProductTable() {
                                   value={removeAmount}
                                   min={1}
                                   max={p.quantity}
-                                  onChange={(e) => setRemoveAmount(Math.max(1, Number(e.target.value)))}
+                                  onChange={(e) =>
+                                    setRemoveAmount(
+                                      Math.max(1, Number(e.target.value)),
+                                    )
+                                  }
                                   className="w-12 text-center border border-slate-200 dark:border-slate-700 rounded-lg px-1 py-1 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400"
                                 />
                                 <button
-                                  onClick={() => setRemoveAmount(Math.min(p.quantity, removeAmount + 1))}
+                                  onClick={() =>
+                                    setRemoveAmount(
+                                      Math.min(p.quantity, removeAmount + 1),
+                                    )
+                                  }
                                   className="p-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition"
                                   title="Aumentar"
                                 >
@@ -606,7 +690,9 @@ export default function ProductTable() {
                           <div className="flex justify-end gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => startRemove(p)}
-                              disabled={deletingId !== null || editingId !== null}
+                              disabled={
+                                deletingId !== null || editingId !== null
+                              }
                               className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/20 rounded-lg transition disabled:opacity-40"
                               title="Retirar quantidade do estoque"
                             >
@@ -614,7 +700,9 @@ export default function ProductTable() {
                             </button>
                             <button
                               onClick={() => startEdit(p)}
-                              disabled={deletingId !== null || removingId !== null}
+                              disabled={
+                                deletingId !== null || removingId !== null
+                              }
                               className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition disabled:opacity-40"
                               title="Editar produto"
                             >
@@ -622,7 +710,9 @@ export default function ProductTable() {
                             </button>
                             <button
                               onClick={() => setDeletingId(p.id)}
-                              disabled={deletingId !== null || removingId !== null}
+                              disabled={
+                                deletingId !== null || removingId !== null
+                              }
                               className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition disabled:opacity-40"
                               title="Excluir produto"
                             >
@@ -639,7 +729,6 @@ export default function ProductTable() {
           </div>
         )}
       </div>
-
     </div>
   );
 }
