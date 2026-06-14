@@ -91,6 +91,22 @@ product_inventory/
 
 ---
 
+## 🖼️ Demonstrações
+
+### 🔐 Tela de Login
+<img width="1145" height="935" alt="image" src="https://github.com/user-attachments/assets/5d5e5527-118b-43c0-b433-e6f81e19ead3" />
+
+### 📝 Cadastro de Produto
+<img width="1541" height="970" alt="image" src="https://github.com/user-attachments/assets/fb1dcf3f-fa5d-47b8-8c24-5e81f3c82a2c" />
+<img width="1582" height="966" alt="image" src="https://github.com/user-attachments/assets/e3fc8f3c-3635-42da-970f-e13b75c6896e" />
+
+### 📊 Dashboard de Inventário
+![Dashboard](./docs/images/dashboard.png)
+
+### 📋 Tabela de Produtos
+<img width="1647" height="967" alt="image" src="https://github.com/user-attachments/assets/70c41651-423c-43fc-bf87-bf85ee922301" />
+<img width="1590" height="975" alt="image" src="https://github.com/user-attachments/assets/b474bf2e-0a80-46b5-a5bd-905bf6daab64" />
+
 ## 📜 Licença
 
 Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` para mais detalhes.
