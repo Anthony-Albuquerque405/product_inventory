@@ -101,7 +101,7 @@ product_inventory/
 <img width="1582" height="966" alt="image" src="https://github.com/user-attachments/assets/e3fc8f3c-3635-42da-970f-e13b75c6896e" />
 
 ### 📊 Dashboard de Inventário
-![Dashboard](./docs/images/dashboard.png)
+(./docs/images/dashboard.png)
 
 ### 📋 Tabela de Produtos
 <img width="1647" height="967" alt="image" src="https://github.com/user-attachments/assets/70c41651-423c-43fc-bf87-bf85ee922301" />
