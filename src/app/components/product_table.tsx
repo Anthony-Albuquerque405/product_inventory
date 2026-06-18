@@ -37,6 +37,8 @@ export default function ProductTable() {
     type: "success" | "error";
   } | null>(null);
 
+  const [role, setRole] = useState<string | null>(null);
+
   // Estados de busca e filtro
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -82,6 +84,15 @@ export default function ProductTable() {
         showNotification("Sessão expirada. Faça login novamente.", "error");
         return;
       }
+
+      // Buscar a role do usuário
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (profile) setRole(profile.role);
 
       const res = await fetch("/api/products", {
         headers: {
@@ -453,7 +464,7 @@ export default function ProductTable() {
                   <th className="p-4">Quantidade</th>
                   <th className="p-4">Preço (R$)</th>
                   <th className="p-4">Valor Total (R$)</th>
-                  <th className="p-4 text-right">Ações</th>
+                  {role === 'admin' && <th className="p-4 text-right">Ações</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 text-sm">
@@ -570,157 +581,159 @@ export default function ProductTable() {
                         R$ {(Number(p.quantity) * Number(p.price)).toFixed(2)}
                       </td>
 
-                      {/* Ações */}
-                      <td className="p-4 text-right">
-                        {isEditing ? (
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={saveEdit}
-                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition"
-                              title="Salvar alterações"
-                            >
-                              <Check size={16} />
-                            </button>
-                            <button
-                              onClick={cancelEdit}
-                              className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
-                              title="Cancelar edição"
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
-                        ) : isDeleting ? (
-                          <div className="flex justify-end items-center gap-2">
-                            <span className="text-[11px] font-semibold text-red-600 dark:text-red-400">
-                              Excluir?
-                            </span>
-                            <button
-                              onClick={() => deleteProduct(p.id)}
-                              className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-[11px] font-bold transition"
-                            >
-                              Sim
-                            </button>
-                            <button
-                              onClick={() => setDeletingId(null)}
-                              className="px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[11px] font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition"
-                            >
-                              Não
-                            </button>
-                          </div>
-                        ) : removingId === p.id ? (
-                          // Painel de retirada de quantidade
-                          <div className="flex justify-end items-center gap-1.5 animate-fade-in">
-                            {zeroStockConfirm ? (
-                              // Confirmação de exclusão por estoque zerado
-                              <>
-                                <span className="text-[11px] font-semibold text-red-600 dark:text-red-400 whitespace-nowrap">
-                                  Estoque vai zerar. Excluir?
-                                </span>
-                                <button
-                                  onClick={() => deleteProduct(p.id)}
-                                  className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-[11px] font-bold transition"
-                                >
-                                  Sim
-                                </button>
-                                <button
-                                  onClick={() => setZeroStockConfirm(false)}
-                                  className="px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[11px] font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition"
-                                >
-                                  Não
-                                </button>
-                              </>
-                            ) : (
-                              // Input de retirada
-                              <>
-                                <span className="text-[11px] font-semibold text-orange-600 dark:text-orange-400 whitespace-nowrap">
-                                  Retirar:
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    setRemoveAmount(
-                                      Math.max(1, removeAmount - 1),
-                                    )
-                                  }
-                                  className="p-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition"
-                                  title="Diminuir"
-                                >
-                                  <Minus size={13} />
-                                </button>
-                                <input
-                                  type="number"
-                                  value={removeAmount}
-                                  min={1}
-                                  max={p.quantity}
-                                  onChange={(e) =>
-                                    setRemoveAmount(
-                                      Math.max(1, Number(e.target.value)),
-                                    )
-                                  }
-                                  className="w-12 text-center border border-slate-200 dark:border-slate-700 rounded-lg px-1 py-1 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400"
-                                />
-                                <button
-                                  onClick={() =>
-                                    setRemoveAmount(
-                                      Math.min(p.quantity, removeAmount + 1),
-                                    )
-                                  }
-                                  className="p-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition"
-                                  title="Aumentar"
-                                >
-                                  <Plus size={13} />
-                                </button>
-                                <button
-                                  onClick={() => confirmRemove(p)}
-                                  className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition"
-                                  title="Confirmar retirada"
-                                >
-                                  <Check size={15} />
-                                </button>
-                                <button
-                                  onClick={cancelRemove}
-                                  className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
-                                  title="Cancelar"
-                                >
-                                  <X size={15} />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="flex justify-end gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => startRemove(p)}
-                              disabled={
-                                deletingId !== null || editingId !== null
-                              }
-                              className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/20 rounded-lg transition disabled:opacity-40"
-                              title="Retirar quantidade do estoque"
-                            >
-                              <MinusCircle size={16} />
-                            </button>
-                            <button
-                              onClick={() => startEdit(p)}
-                              disabled={
-                                deletingId !== null || removingId !== null
-                              }
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition disabled:opacity-40"
-                              title="Editar produto"
-                            >
-                              <Edit3 size={16} />
-                            </button>
-                            <button
-                              onClick={() => setDeletingId(p.id)}
-                              disabled={
-                                deletingId !== null || removingId !== null
-                              }
-                              className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition disabled:opacity-40"
-                              title="Excluir produto"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        )}
-                      </td>
+                      {/* Ações (Apenas Admin) */}
+                      {role === 'admin' && (
+                        <td className="p-4 text-right">
+                          {isEditing ? (
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={saveEdit}
+                                className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition"
+                                title="Salvar alterações"
+                              >
+                                <Check size={16} />
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                                title="Cancelar edição"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          ) : isDeleting ? (
+                            <div className="flex justify-end items-center gap-2">
+                              <span className="text-[11px] font-semibold text-red-600 dark:text-red-400">
+                                Excluir?
+                              </span>
+                              <button
+                                onClick={() => deleteProduct(p.id)}
+                                className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-[11px] font-bold transition"
+                              >
+                                Sim
+                              </button>
+                              <button
+                                onClick={() => setDeletingId(null)}
+                                className="px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[11px] font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition"
+                              >
+                                Não
+                              </button>
+                            </div>
+                          ) : removingId === p.id ? (
+                            // Painel de retirada de quantidade
+                            <div className="flex justify-end items-center gap-1.5 animate-fade-in">
+                              {zeroStockConfirm ? (
+                                // Confirmação de exclusão por estoque zerado
+                                <>
+                                  <span className="text-[11px] font-semibold text-red-600 dark:text-red-400 whitespace-nowrap">
+                                    Estoque vai zerar. Excluir?
+                                  </span>
+                                  <button
+                                    onClick={() => deleteProduct(p.id)}
+                                    className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-[11px] font-bold transition"
+                                  >
+                                    Sim
+                                  </button>
+                                  <button
+                                    onClick={() => setZeroStockConfirm(false)}
+                                    className="px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[11px] font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition"
+                                  >
+                                    Não
+                                  </button>
+                                </>
+                              ) : (
+                                // Input de retirada
+                                <>
+                                  <span className="text-[11px] font-semibold text-orange-600 dark:text-orange-400 whitespace-nowrap">
+                                    Retirar:
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      setRemoveAmount(
+                                        Math.max(1, removeAmount - 1),
+                                      )
+                                    }
+                                    className="p-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition"
+                                    title="Diminuir"
+                                  >
+                                    <Minus size={13} />
+                                  </button>
+                                  <input
+                                    type="number"
+                                    value={removeAmount}
+                                    min={1}
+                                    max={p.quantity}
+                                    onChange={(e) =>
+                                      setRemoveAmount(
+                                        Math.max(1, Number(e.target.value)),
+                                      )
+                                    }
+                                    className="w-12 text-center border border-slate-200 dark:border-slate-700 rounded-lg px-1 py-1 bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400"
+                                  />
+                                  <button
+                                    onClick={() =>
+                                      setRemoveAmount(
+                                        Math.min(p.quantity, removeAmount + 1),
+                                      )
+                                    }
+                                    className="p-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition"
+                                    title="Aumentar"
+                                  >
+                                    <Plus size={13} />
+                                  </button>
+                                  <button
+                                    onClick={() => confirmRemove(p)}
+                                    className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition"
+                                    title="Confirmar retirada"
+                                  >
+                                    <Check size={15} />
+                                  </button>
+                                  <button
+                                    onClick={cancelRemove}
+                                    className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                                    title="Cancelar"
+                                  >
+                                    <X size={15} />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex justify-end gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => startRemove(p)}
+                                disabled={
+                                  deletingId !== null || editingId !== null
+                                }
+                                className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/20 rounded-lg transition disabled:opacity-40"
+                                title="Retirar quantidade do estoque"
+                              >
+                                <MinusCircle size={16} />
+                              </button>
+                              <button
+                                onClick={() => startEdit(p)}
+                                disabled={
+                                  deletingId !== null || removingId !== null
+                                }
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition disabled:opacity-40"
+                                title="Editar produto"
+                              >
+                                <Edit3 size={16} />
+                              </button>
+                              <button
+                                onClick={() => setDeletingId(p.id)}
+                                disabled={
+                                  deletingId !== null || removingId !== null
+                                }
+                                className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition disabled:opacity-40"
+                                title="Excluir produto"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
