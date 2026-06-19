@@ -57,7 +57,8 @@ CREATE TABLE IF NOT EXISTS public.products (
     quantity INTEGER NOT NULL DEFAULT 0,
     price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, -- Este é o owner_id
-    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
@@ -157,3 +158,20 @@ BEGIN
   WHERE id = prod_id AND quantity >= qty;
 END;
 $$ LANGUAGE plpgsql;
+
+-- ==========================================
+-- 6. Triggers Auxiliares
+-- ==========================================
+-- Função para atualizar a coluna updated_at automaticamente
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
+RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at = timezone('utc'::text, now());
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS on_product_updated ON public.products;
+CREATE TRIGGER on_product_updated
+  BEFORE UPDATE ON public.products
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();

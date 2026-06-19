@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { supabase } from "./lib/supabaseClient";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   PlusCircle,
   Tag,
@@ -13,26 +16,37 @@ import {
   FolderPlus,
 } from "lucide-react";
 
-export default function ProductRegistration() {
-  const [product, setProduct] = useState({
-    name: "",
-    category: "",
-    quantity: 1,
-    price: 0,
-  });
+// Schema de validação usando Zod
+const productSchema = z.object({
+  name: z.string().min(2, "O nome deve ter no mínimo 2 caracteres"),
+  category: z.string().min(1, "Selecione uma categoria"),
+  quantity: z.number().int().min(0, "A quantidade não pode ser negativa"),
+  price: z.number().min(0, "O preço não pode ser negativo"),
+});
 
+type ProductFormValues = z.infer<typeof productSchema>;
+
+export default function ProductRegistration() {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{
     text: string;
     type: "success" | "error";
   } | null>(null);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setProduct({ ...product, [name]: value });
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      category: "",
+      quantity: 1,
+      price: 0,
+    },
+  });
 
   const showNotification = (text: string, type: "success" | "error") => {
     setNotification({ text, type });
@@ -41,19 +55,11 @@ export default function ProductRegistration() {
     }, 4000);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (product.quantity < 0 || product.price < 0) {
-      showNotification("Quantidade e preço não podem ser negativos", "error");
-      return;
-    }
-
+  const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
       setNotification(null);
 
-      // Obter o token do usuário logado
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -70,16 +76,16 @@ export default function ProductRegistration() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(product),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json();
+      const resData = await res.json();
 
       if (res.ok) {
         showNotification("Produto registrado com sucesso!", "success");
-        setProduct({ name: "", category: "", quantity: 1, price: 0 });
+        reset();
       } else {
-        showNotification(data.error || "Erro ao registrar produto", "error");
+        showNotification(resData.error || "Erro ao registrar produto", "error");
       }
     } catch (err) {
       showNotification("Erro inesperado ao conectar com o servidor", "error");
@@ -122,7 +128,7 @@ export default function ProductRegistration() {
       )}
 
       {/* Formulário */}
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Nome do Produto */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
@@ -135,14 +141,12 @@ export default function ProductRegistration() {
             />
             <input
               type="text"
-              name="name"
               placeholder="Ex: Smartphone Galaxy S24"
-              value={product.name}
-              onChange={handleChange}
-              required
-              className="w-full border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              {...register("name")}
+              className={`w-full border ${errors.name ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'} rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
             />
           </div>
+          {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
         </div>
 
         {/* Categoria */}
@@ -156,11 +160,8 @@ export default function ProductRegistration() {
               size={18}
             />
             <select
-              name="category"
-              value={product.category}
-              onChange={handleChange}
-              required
-              className="w-full border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+              {...register("category")}
+              className={`w-full border ${errors.category ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'} rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 transition-all appearance-none cursor-pointer`}
             >
               <option value="" className="dark:bg-slate-900">
                 Selecione a categoria...
@@ -195,6 +196,7 @@ export default function ProductRegistration() {
               </svg>
             </div>
           </div>
+          {errors.category && <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>}
         </div>
 
         {/* Quantidade e Preço lado a lado */}
@@ -211,15 +213,12 @@ export default function ProductRegistration() {
               />
               <input
                 type="number"
-                name="quantity"
                 placeholder="0"
-                value={product.quantity}
-                onChange={handleChange}
-                min="0"
-                required
-                className="w-full border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                {...register("quantity", { valueAsNumber: true })}
+                className={`w-full border ${errors.quantity ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'} rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
               />
             </div>
+            {errors.quantity && <p className="text-xs text-red-500 mt-1">{errors.quantity.message}</p>}
           </div>
 
           {/* Preço */}
@@ -234,16 +233,13 @@ export default function ProductRegistration() {
               />
               <input
                 type="number"
-                name="price"
-                placeholder="0.00"
-                value={product.price || ""}
-                onChange={handleChange}
-                min="0"
                 step="0.01"
-                required
-                className="w-full border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                placeholder="0.00"
+                {...register("price", { valueAsNumber: true })}
+                className={`w-full border ${errors.price ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'} rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
               />
             </div>
+            {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price.message}</p>}
           </div>
         </div>
 

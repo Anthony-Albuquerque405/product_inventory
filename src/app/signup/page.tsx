@@ -52,32 +52,24 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
+      const { data, error } = await supabase.auth.signUp({
+        email: credentials.email,
+        password: credentials.password,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (error) {
+        setErrorMsg(error.message || "Erro ao realizar o cadastro.");
+      } else {
         setSuccessMsg(
           "Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta.",
         );
         setCredentials({ email: "", password: "" });
 
-        // Se a conta for auto-confirmada e tiver sessão ativa, salva e redireciona
         if (data.session) {
-          await supabase.auth.setSession({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-          });
           setTimeout(() => {
             router.push("/");
           }, 2000);
         }
-      } else {
-        setErrorMsg(data.error || "Erro ao realizar o cadastro.");
       }
     } catch (err) {
       setErrorMsg("Erro de conexão com o servidor.");

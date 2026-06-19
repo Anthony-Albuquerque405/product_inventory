@@ -142,6 +142,11 @@ export default function ProductTable() {
       return;
     }
 
+    const previousProducts = [...products];
+    // Atualização otimista
+    setProducts(products.map((p) => (p.id === editForm.id ? editForm : p)));
+    setEditingId(null); // Fecha a edição imediatamente
+
     try {
       const {
         data: { session },
@@ -150,6 +155,7 @@ export default function ProductTable() {
 
       if (!token) {
         showNotification("Sessão expirada.", "error");
+        setProducts(previousProducts);
         return;
       }
 
@@ -166,15 +172,17 @@ export default function ProductTable() {
 
       if (res.ok) {
         showNotification("Produto atualizado com sucesso!", "success");
-        setProducts(
-          products.map((p) => (p.id === editForm.id ? data.data : p)),
-        );
-        cancelEdit();
+        // Opcional: Atualizar com os dados do servidor caso o banco de dados modifique algo (como formatação de price)
+        setProducts(products.map((p) => (p.id === editForm.id ? data.data : p)));
       } else {
+        setProducts(previousProducts);
         showNotification(data.error || "Erro ao atualizar produto", "error");
       }
     } catch (err) {
+      setProducts(previousProducts);
       showNotification("Erro de conexão ao salvar alterações", "error");
+    } finally {
+      setEditForm(null);
     }
   };
 
@@ -200,6 +208,13 @@ export default function ProductTable() {
       return;
     }
 
+    const previousProducts = [...products];
+    // Atualização Otimista
+    setProducts(
+      products.map((p) => (p.id === product.id ? { ...p, quantity: newQty } : p))
+    );
+    cancelRemove();
+
     try {
       const {
         data: { session },
@@ -207,6 +222,7 @@ export default function ProductTable() {
       const token = session?.access_token;
       if (!token) {
         showNotification("Sessão expirada.", "error");
+        setProducts(previousProducts);
         return;
       }
 
@@ -225,22 +241,23 @@ export default function ProductTable() {
           `${removeAmount} unidade(s) retirada(s) do estoque!`,
           "success",
         );
-        setProducts(
-          products.map((p) =>
-            p.id === product.id ? { ...p, quantity: newQty } : p,
-          ),
-        );
-        cancelRemove();
       } else {
+        setProducts(previousProducts);
         showNotification(data.error || "Erro ao atualizar quantidade", "error");
       }
     } catch {
+      setProducts(previousProducts);
       showNotification("Erro de conexão ao atualizar quantidade", "error");
     }
   };
 
   // Handler para deletar produto
   const deleteProduct = async (id: string) => {
+    const previousProducts = [...products];
+    // Atualização Otimista
+    setProducts(products.filter((p) => p.id !== id));
+    setDeletingId(null);
+
     try {
       const {
         data: { session },
@@ -249,6 +266,7 @@ export default function ProductTable() {
 
       if (!token) {
         showNotification("Sessão expirada.", "error");
+        setProducts(previousProducts);
         return;
       }
 
@@ -263,12 +281,12 @@ export default function ProductTable() {
 
       if (res.ok) {
         showNotification("Produto excluído com sucesso!", "success");
-        setProducts(products.filter((p) => p.id !== id));
-        setDeletingId(null);
       } else {
+        setProducts(previousProducts);
         showNotification(data.error || "Erro ao deletar produto", "error");
       }
     } catch (err) {
+      setProducts(previousProducts);
       showNotification("Erro de conexão ao deletar produto", "error");
     }
   };

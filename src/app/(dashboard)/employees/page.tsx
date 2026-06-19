@@ -185,30 +185,32 @@ export default function EmployeesPage() {
             <p className="text-sm">Clique em "Novo Caixa" para adicionar membros à sua equipe.</p>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="p-4">ID do Perfil</th>
-                <th className="p-4">Cargo</th>
-                <th className="p-4">Data de Criação</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 text-sm">
-              {employees.map(emp => (
-                <tr key={emp.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                  <td className="p-4 font-mono text-xs text-slate-500 dark:text-slate-400">{emp.id}</td>
-                  <td className="p-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
-                      Caixa
-                    </span>
-                  </td>
-                  <td className="p-4 text-slate-500">
-                    {new Date(emp.created_at).toLocaleDateString("pt-BR")}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="p-4">ID do Perfil</th>
+                  <th className="p-4">Cargo</th>
+                  <th className="p-4">Data de Criação</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 text-sm">
+                {employees.map(emp => (
+                  <tr key={emp.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                    <td className="p-4 font-mono text-xs text-slate-500 dark:text-slate-400">{emp.id}</td>
+                    <td className="p-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
+                        Caixa
+                      </span>
+                    </td>
+                    <td className="p-4 text-slate-500">
+                      {new Date(emp.created_at).toLocaleDateString("pt-BR")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

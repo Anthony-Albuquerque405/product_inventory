@@ -180,10 +180,10 @@ export default function PDVPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-100px)]">
+    <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[calc(100vh-100px)] min-h-0">
       
       {/* Coluna Esquerda: Produtos */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden h-[500px] lg:h-full">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Catálogo de Produtos</h2>
           <div className="relative">
@@ -226,7 +226,7 @@ export default function PDVPage() {
       </div>
 
       {/* Coluna Direita: Carrinho e Checkout */}
-      <div className="w-full lg:w-96 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden shrink-0">
+      <div className="w-full lg:w-96 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden shrink-0 h-[500px] lg:h-full">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <ShoppingCart className="text-blue-600 dark:text-blue-400" size={20} />

@@ -38,29 +38,20 @@ export default function LoginPage() {
     setSuccessMsg(null);
 
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (error) {
+        setErrorMsg(error.message || "Ocorreu um erro ao fazer login.");
+      } else {
         setSuccessMsg("Login realizado com sucesso! Redirecionando...");
-
-        // Salva a sessão no cliente e redireciona
-        await supabase.auth.setSession({
-          access_token: data.session?.access_token || "",
-          refresh_token: data.session?.refresh_token || "",
-        });
 
         setTimeout(() => {
           router.push("/");
           router.refresh();
         }, 1500);
-      } else {
-        setErrorMsg(data.error || "Ocorreu um erro ao fazer login.");
       }
     } catch (err) {
       setErrorMsg("Erro de conexão com o servidor.");

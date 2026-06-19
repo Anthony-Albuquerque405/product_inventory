@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import ProductTable from "../components/product_table";
-import ProductRegistration from "../components/product_registration";
+import ProductTable from "../components/ProductTable";
+import ProductRegistration from "../components/ProductRegistration";
 import { Plus, List } from "lucide-react";
 import { supabase } from "../components/lib/supabaseClient";
 

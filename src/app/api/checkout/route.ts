@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase, getSupabaseUserClient } from "../../components/lib/supabaseClient";
+import { getSupabaseUserClient } from "../../components/lib/supabaseClient";
 
 export async function POST(request: Request) {
   try {
@@ -9,14 +9,14 @@ export async function POST(request: Request) {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    // Criar um cliente autenticado com o token do usuário
+    const userClient = getSupabaseUserClient(token);
+
+    const { data: { user }, error: authError } = await userClient.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
-
-    // Criar um cliente autenticado com o token do usuário para que o RLS funcione
-    const userClient = getSupabaseUserClient(token);
 
     /* 
      * PASSO A PASSO FORMAS DE PAGAMENTO (Backend / Recebimento)
@@ -69,23 +69,15 @@ export async function POST(request: Request) {
 
       // Atualizar estoque (subtrair)
       // Como a chamada é feita pelo usuário autenticado, RLS de UPDATE é ativada.
-      await userClient.rpc('decrement_product_quantity', {
+      // O uso do RPC previne condições de corrida (Race Conditions).
+      const { error: rpcError } = await userClient.rpc('decrement_product_quantity', {
         prod_id: item.id,
         qty: item.cartQuantity
       });
-      // NOTA: Se 'decrement_product_quantity' não existir, vamos atualizar via UPDATE normal.
       
-      const { data: currentProd } = await userClient
-        .from('products')
-        .select('quantity')
-        .eq('id', item.id)
-        .single();
-        
-      if (currentProd) {
-        await userClient
-          .from('products')
-          .update({ quantity: currentProd.quantity - item.cartQuantity })
-          .eq('id', item.id);
+      if (rpcError) {
+        console.error("Erro ao decrementar estoque:", rpcError);
+        throw new Error("Erro ao atualizar o estoque.");
       }
     }
 
