@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../components/lib/supabaseClient";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2, Plus, Users, UserPlus, Check, X, Mail, KeyRound } from "lucide-react";
+import { toast } from "sonner";
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -46,11 +47,11 @@ export default function EmployeesPage() {
   const handleCreateEmployee = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      alert("Preencha email e senha.");
+      toast.error("Preencha email e senha.");
       return;
     }
     if (!adminId) {
-      alert("Erro: ID do admin não encontrado. Recarregue a página.");
+      toast.error("Erro: ID do admin não encontrado. Recarregue a página.");
       return;
     }
 
@@ -77,9 +78,9 @@ export default function EmployeesPage() {
 
       if (error) {
         console.error("SignUp Error:", error);
-        alert("Erro ao criar funcionário: " + error.message);
+        toast.error("Erro ao criar funcionário: " + error.message);
       } else {
-        alert("Funcionário criado com sucesso!");
+        toast.success("Funcionário criado com sucesso!");
         setShowForm(false);
         setEmail("");
         setPassword("");
@@ -87,7 +88,7 @@ export default function EmployeesPage() {
       }
     } catch (err: any) {
       console.error("Catch Error:", err);
-      alert("Erro ao conectar: " + err.message);
+      toast.error("Erro ao conectar: " + err.message);
     } finally {
       setIsCreating(false);
     }
@@ -95,8 +96,12 @@ export default function EmployeesPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin text-blue-600 h-8 w-8" />
+      <div className="space-y-6 animate-pulse">
+        <div className="flex justify-between items-center mb-6">
+          <div className="bg-slate-200 dark:bg-slate-800 h-8 w-48 rounded-lg"></div>
+          <div className="bg-slate-200 dark:bg-slate-800 h-10 w-32 rounded-xl"></div>
+        </div>
+        <div className="bg-slate-200 dark:bg-slate-800 h-64 w-full rounded-2xl"></div>
       </div>
     );
   }

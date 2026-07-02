@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   Loader2
 } from "lucide-react";
+import ProductAvatar from "../../components/ProductAvatar";
+import { toast } from "sonner";
 
 interface Product {
   id: string;
@@ -116,14 +118,14 @@ export default function PDVPage() {
      * Se não, exibimos um alerta e travamos a função para o usuário não finalizar sem escolher.
      */
     if (!paymentMethod) {
-      alert("Por favor, selecione uma forma de pagamento!");
+      toast.error("Por favor, selecione uma forma de pagamento!");
       return;
     }
 
     if (paymentMethod === "Dinheiro") {
       const given = Number(amountGiven);
       if (!amountGiven || given < total) {
-        alert("O valor recebido não pode ser menor que o total da venda!");
+        toast.error("O valor recebido não pode ser menor que o total da venda!");
         return;
       }
     }
@@ -158,14 +160,15 @@ export default function PDVPage() {
         setCart([]);
         setPaymentMethod("");
         setAmountGiven("");
+        toast.success("Venda finalizada com sucesso!");
         fetchProducts(); // Atualiza o estoque na tela
         setTimeout(() => setSuccess(false), 3000);
       } else {
         const errData = await res.json();
-        alert("Erro ao finalizar venda: " + errData.error);
+        toast.error("Erro ao finalizar venda: " + errData.error);
       }
     } catch (err) {
-      alert("Erro de conexão ao finalizar venda.");
+      toast.error("Erro de conexão ao finalizar venda.");
     } finally {
       setIsProcessing(false);
     }
@@ -173,8 +176,9 @@ export default function PDVPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin text-blue-600 h-8 w-8" />
+      <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[calc(100vh-100px)] animate-pulse">
+        <div className="flex-1 bg-slate-200 dark:bg-slate-800 rounded-2xl h-[500px] lg:h-full"></div>
+        <div className="w-full lg:w-96 bg-slate-200 dark:bg-slate-800 rounded-2xl h-[500px] lg:h-full shrink-0"></div>
       </div>
     );
   }
@@ -205,7 +209,10 @@ export default function PDVPage() {
               onClick={() => addToCart(product)}
               className="flex flex-col text-left p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all bg-slate-50 dark:bg-slate-950 group"
             >
-              <div className="flex-1 mb-2">
+              <div className="flex flex-col items-center mb-3">
+                <ProductAvatar name={product.name} size="lg" />
+              </div>
+              <div className="flex-1 mb-2 text-center w-full">
                 <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2">{product.name}</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Estoque: {product.quantity}</p>
               </div>
@@ -246,6 +253,7 @@ export default function PDVPage() {
           ) : (
             cart.map(item => (
               <div key={item.id} className="flex gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
+                <ProductAvatar name={item.name} size="sm" />
                 <div className="flex-1">
                   <h4 className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-1">{item.name}</h4>
                   <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-1">
@@ -346,7 +354,7 @@ export default function PDVPage() {
             <button 
               onClick={handleCheckout}
               disabled={cart.length === 0 || isProcessing}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-all"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               {isProcessing ? <Loader2 className="animate-spin" size={20} /> : "Finalizar Venda"}
             </button>

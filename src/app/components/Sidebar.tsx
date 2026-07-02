@@ -83,7 +83,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+      <div className="md:hidden flex items-center justify-between p-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-xl text-white">
             <Package size={20} />
@@ -104,7 +104,7 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside className={`
-        fixed md:sticky top-0 left-0 z-50 h-screen bg-white dark:bg-slate-900 
+        fixed md:sticky top-0 left-0 z-50 h-screen bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl
         border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col transition-all duration-300
         ${isCollapsed ? "w-20" : "w-64"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
@@ -134,7 +134,7 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3 space-y-1">
           {filteredNavItems.map((item) => {
             const isActive = pathname === item.href;
             return (

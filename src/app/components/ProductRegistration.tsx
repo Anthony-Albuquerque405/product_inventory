@@ -15,6 +15,7 @@ import {
   Loader2,
   FolderPlus,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // Schema de validação usando Zod
 const productSchema = z.object({
@@ -28,10 +29,6 @@ type ProductFormValues = z.infer<typeof productSchema>;
 
 export default function ProductRegistration() {
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState<{
-    text: string;
-    type: "success" | "error";
-  } | null>(null);
 
   const {
     register,
@@ -48,17 +45,9 @@ export default function ProductRegistration() {
     },
   });
 
-  const showNotification = (text: string, type: "success" | "error") => {
-    setNotification({ text, type });
-    setTimeout(() => {
-      setNotification(null);
-    }, 4000);
-  };
-
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setLoading(true);
-      setNotification(null);
 
       const {
         data: { session },
@@ -66,7 +55,7 @@ export default function ProductRegistration() {
       const token = session?.access_token;
 
       if (!token) {
-        showNotification("Sessão expirada. Faça login novamente.", "error");
+        toast.error("Sessão expirada. Faça login novamente.");
         return;
       }
 
@@ -82,13 +71,13 @@ export default function ProductRegistration() {
       const resData = await res.json();
 
       if (res.ok) {
-        showNotification("Produto registrado com sucesso!", "success");
+        toast.success("Produto registrado com sucesso!");
         reset();
       } else {
-        showNotification(resData.error || "Erro ao registrar produto", "error");
+        toast.error(resData.error || "Erro ao registrar produto");
       }
     } catch (err) {
-      showNotification("Erro inesperado ao conectar com o servidor", "error");
+      toast.error("Erro inesperado ao conectar com o servidor");
     } finally {
       setLoading(false);
     }
@@ -109,24 +98,6 @@ export default function ProductRegistration() {
         </p>
       </div>
 
-      {/* Notificação elegante */}
-      {notification && (
-        <div
-          className={`flex items-center gap-3 p-4 mb-6 text-sm rounded-xl border animate-fade-in ${
-            notification.type === "success"
-              ? "text-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-300 border-emerald-200/50 dark:border-emerald-900/40"
-              : "text-red-800 bg-red-50 dark:bg-red-950/20 dark:text-red-300 border-red-200/50 dark:border-red-900/40"
-          }`}
-        >
-          {notification.type === "success" ? (
-            <CheckCircle2 className="shrink-0 text-emerald-500" size={18} />
-          ) : (
-            <AlertCircle className="shrink-0 text-red-500" size={18} />
-          )}
-          <span className="font-medium">{notification.text}</span>
-        </div>
-      )}
-
       {/* Formulário */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Nome do Produto */}
@@ -136,7 +107,7 @@ export default function ProductRegistration() {
           </label>
           <div className="relative">
             <Tag
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              className={`absolute left-3 top-1/2 -translate-y-1/2 ${errors.name ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'}`}
               size={18}
             />
             <input
@@ -146,7 +117,7 @@ export default function ProductRegistration() {
               className={`w-full border ${errors.name ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'} rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
             />
           </div>
-          {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+          {errors.name && <p className="text-xs text-red-500 dark:text-red-400 mt-1.5 flex items-center gap-1 font-medium animate-fade-in"><AlertCircle size={12} /> {errors.name.message}</p>}
         </div>
 
         {/* Categoria */}
@@ -156,7 +127,7 @@ export default function ProductRegistration() {
           </label>
           <div className="relative">
             <Layers
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+              className={`absolute left-3 top-1/2 -translate-y-1/2 ${errors.category ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'}`}
               size={18}
             />
             <select
@@ -196,7 +167,7 @@ export default function ProductRegistration() {
               </svg>
             </div>
           </div>
-          {errors.category && <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>}
+          {errors.category && <p className="text-xs text-red-500 dark:text-red-400 mt-1.5 flex items-center gap-1 font-medium animate-fade-in"><AlertCircle size={12} /> {errors.category.message}</p>}
         </div>
 
         {/* Quantidade e Preço lado a lado */}
@@ -208,7 +179,7 @@ export default function ProductRegistration() {
             </label>
             <div className="relative">
               <PlusCircle
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                className={`absolute left-3 top-1/2 -translate-y-1/2 ${errors.quantity ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'}`}
                 size={18}
               />
               <input
@@ -218,7 +189,7 @@ export default function ProductRegistration() {
                 className={`w-full border ${errors.quantity ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'} rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
               />
             </div>
-            {errors.quantity && <p className="text-xs text-red-500 mt-1">{errors.quantity.message}</p>}
+            {errors.quantity && <p className="text-xs text-red-500 dark:text-red-400 mt-1.5 flex items-center gap-1 font-medium animate-fade-in"><AlertCircle size={12} /> {errors.quantity.message}</p>}
           </div>
 
           {/* Preço */}
@@ -228,7 +199,7 @@ export default function ProductRegistration() {
             </label>
             <div className="relative">
               <DollarSign
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+                className={`absolute left-3 top-1/2 -translate-y-1/2 ${errors.price ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'}`}
                 size={18}
               />
               <input
@@ -239,7 +210,7 @@ export default function ProductRegistration() {
                 className={`w-full border ${errors.price ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-200 dark:border-slate-800 focus:ring-blue-500/20 focus:border-blue-500'} rounded-xl pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-950/40 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
               />
             </div>
-            {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price.message}</p>}
+            {errors.price && <p className="text-xs text-red-500 dark:text-red-400 mt-1.5 flex items-center gap-1 font-medium animate-fade-in"><AlertCircle size={12} /> {errors.price.message}</p>}
           </div>
         </div>
 

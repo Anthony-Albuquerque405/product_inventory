@@ -20,6 +20,8 @@ import {
   Plus,
   Minus,
 } from "lucide-react";
+import { toast } from "sonner";
+import SalesChart from "./SalesChart";
 
 interface Product {
   id: string;
@@ -32,10 +34,6 @@ interface Product {
 export default function ProductTable() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [notification, setNotification] = useState<{
-    text: string;
-    type: "success" | "error";
-  } | null>(null);
 
   const [role, setRole] = useState<string | null>(null);
 
@@ -65,11 +63,15 @@ export default function ProductTable() {
     "Outros",
   ];
 
-  const showNotification = (text: string, type: "success" | "error") => {
-    setNotification({ text, type });
-    setTimeout(() => {
-      setNotification(null);
-    }, 4500);
+  const getCategoryBadgeColor = (category: string) => {
+    const map: Record<string, string> = {
+      "Eletrônicos": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+      "Móveis": "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+      "Acessórios": "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+      "Vestuário": "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
+      "Alimentos": "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
+    };
+    return map[category] || "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300";
   };
 
   const fetchProducts = async () => {
@@ -81,7 +83,7 @@ export default function ProductTable() {
       const token = session?.access_token;
 
       if (!token) {
-        showNotification("Sessão expirada. Faça login novamente.", "error");
+        toast.error("Sessão expirada. Faça login novamente.");
         return;
       }
 
@@ -105,10 +107,10 @@ export default function ProductTable() {
       if (res.ok) {
         setProducts(data);
       } else {
-        showNotification(data.error || "Erro ao carregar produtos", "error");
+        toast.error(data.error || "Erro ao carregar produtos");
       }
     } catch (err) {
-      showNotification("Erro de conexão ao buscar produtos", "error");
+      toast.error("Erro de conexão ao buscar produtos");
     } finally {
       setLoading(false);
     }
@@ -135,10 +137,7 @@ export default function ProductTable() {
     if (!editForm) return;
 
     if (editForm.quantity < 0 || editForm.price < 0) {
-      showNotification(
-        "Valores de quantidade e preço não podem ser negativos.",
-        "error",
-      );
+      toast.error("Valores de quantidade e preço não podem ser negativos.");
       return;
     }
 
@@ -154,7 +153,7 @@ export default function ProductTable() {
       const token = session?.access_token;
 
       if (!token) {
-        showNotification("Sessão expirada.", "error");
+        toast.error("Sessão expirada.");
         setProducts(previousProducts);
         return;
       }
@@ -171,16 +170,16 @@ export default function ProductTable() {
       const data = await res.json();
 
       if (res.ok) {
-        showNotification("Produto atualizado com sucesso!", "success");
+        toast.success("Produto atualizado com sucesso!");
         // Opcional: Atualizar com os dados do servidor caso o banco de dados modifique algo (como formatação de price)
         setProducts(products.map((p) => (p.id === editForm.id ? data.data : p)));
       } else {
         setProducts(previousProducts);
-        showNotification(data.error || "Erro ao atualizar produto", "error");
+        toast.error(data.error || "Erro ao atualizar produto");
       }
     } catch (err) {
       setProducts(previousProducts);
-      showNotification("Erro de conexão ao salvar alterações", "error");
+      toast.error("Erro de conexão ao salvar alterações");
     } finally {
       setEditForm(null);
     }
@@ -221,7 +220,7 @@ export default function ProductTable() {
       } = await supabase.auth.getSession();
       const token = session?.access_token;
       if (!token) {
-        showNotification("Sessão expirada.", "error");
+        toast.error("Sessão expirada.");
         setProducts(previousProducts);
         return;
       }
@@ -237,17 +236,14 @@ export default function ProductTable() {
 
       const data = await res.json();
       if (res.ok) {
-        showNotification(
-          `${removeAmount} unidade(s) retirada(s) do estoque!`,
-          "success",
-        );
+        toast.success(`${removeAmount} unidade(s) retirada(s) do estoque!`);
       } else {
         setProducts(previousProducts);
-        showNotification(data.error || "Erro ao atualizar quantidade", "error");
+        toast.error(data.error || "Erro ao atualizar quantidade");
       }
     } catch {
       setProducts(previousProducts);
-      showNotification("Erro de conexão ao atualizar quantidade", "error");
+      toast.error("Erro de conexão ao atualizar quantidade");
     }
   };
 
@@ -265,7 +261,7 @@ export default function ProductTable() {
       const token = session?.access_token;
 
       if (!token) {
-        showNotification("Sessão expirada.", "error");
+        toast.error("Sessão expirada.");
         setProducts(previousProducts);
         return;
       }
@@ -280,14 +276,14 @@ export default function ProductTable() {
       const data = await res.json();
 
       if (res.ok) {
-        showNotification("Produto excluído com sucesso!", "success");
+        toast.success("Produto excluído com sucesso!");
       } else {
         setProducts(previousProducts);
-        showNotification(data.error || "Erro ao deletar produto", "error");
+        toast.error(data.error || "Erro ao deletar produto");
       }
     } catch (err) {
       setProducts(previousProducts);
-      showNotification("Erro de conexão ao deletar produto", "error");
+      toast.error("Erro de conexão ao deletar produto");
     }
   };
 
@@ -313,35 +309,20 @@ export default function ProductTable() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-100 w-full">
-        <Loader2 className="animate-spin text-blue-600 dark:text-blue-400 h-8 w-8 mb-2" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Carregando dados do inventário...
-        </p>
+      <div className="space-y-6 animate-pulse">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-slate-200 dark:bg-slate-800 rounded-2xl h-24 w-full"></div>
+          ))}
+        </div>
+        <div className="bg-slate-200 dark:bg-slate-800 rounded-2xl h-16 w-full"></div>
+        <div className="bg-slate-200 dark:bg-slate-800 rounded-2xl h-96 w-full"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Notificação flutuante ou topo */}
-      {notification && (
-        <div
-          className={`flex items-center gap-3 p-4 mb-2 text-sm rounded-xl border animate-fade-in ${
-            notification.type === "success"
-              ? "text-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-300 border-emerald-200/50 dark:border-emerald-900/40"
-              : "text-red-800 bg-red-50 dark:bg-red-950/20 dark:text-red-300 border-red-200/50 dark:border-red-900/40"
-          }`}
-        >
-          {notification.type === "success" ? (
-            <Check className="text-emerald-500 shrink-0" size={18} />
-          ) : (
-            <AlertCircle className="text-red-500 shrink-0" size={18} />
-          )}
-          <span>{notification.text}</span>
-        </div>
-      )}
-
       {/* Painel de Métricas (Dashboard) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Valor Total */}
@@ -358,7 +339,7 @@ export default function ProductTable() {
               })}
             </h3>
           </div>
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
+          <div className="p-3 bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 text-emerald-600 dark:text-emerald-400 rounded-xl">
             <DollarSign size={22} />
           </div>
         </div>
@@ -373,7 +354,7 @@ export default function ProductTable() {
               {totalProducts}
             </h3>
           </div>
-          <div className="p-3 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded-xl">
+          <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-500/5 text-blue-600 dark:text-blue-400 rounded-xl">
             <Package size={22} />
           </div>
         </div>
@@ -388,7 +369,7 @@ export default function ProductTable() {
               {totalQuantity}
             </h3>
           </div>
-          <div className="p-3 bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 rounded-xl">
+          <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/5 text-purple-600 dark:text-purple-400 rounded-xl">
             <TrendingUp size={22} />
           </div>
         </div>
@@ -406,14 +387,17 @@ export default function ProductTable() {
           <div
             className={`p-3 rounded-xl ${
               lowStockCount > 0
-                ? "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 animate-pulse-slow"
-                : "bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
+                ? "bg-gradient-to-br from-amber-500/20 to-amber-500/5 text-amber-600 dark:text-amber-400 animate-pulse-slow"
+                : "bg-gradient-to-br from-slate-500/20 to-slate-500/5 text-slate-400 dark:text-slate-500"
             }`}
           >
             <AlertTriangle size={22} />
           </div>
         </div>
       </div>
+
+      {/* Gráfico de Vendas */}
+      <SalesChart />
 
       {/* Controles de Busca e Filtro */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/80 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -534,7 +518,7 @@ export default function ProductTable() {
                             ))}
                           </select>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${getCategoryBadgeColor(p.category)}`}>
                             {p.category}
                           </span>
                         )}
